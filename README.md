@@ -2,6 +2,8 @@
 
 A MacBook-style notch that sits at the top center of your screen on **KDE Plasma 6 (Wayland)**. It shows when your microphone is in use and what music is playing, and it opens a small card with temperatures and system stats.
 
+<p align="center"><img src="docs/demo.gif" alt="Virtual Notch demo: it slides away for the browser tab underneath, opens a stats card from the top edge, and turns orange when the mic is in use" width="720"></p>
+
 It never gets in your way. Clicks go straight through it, and it **slides out of sight when your mouse comes near**, so browser tabs underneath stay visible and clickable.
 
 | | |
@@ -14,7 +16,7 @@ It never gets in your way. Clicks go straight through it, and it **slides out of
 
 ![stats card](docs/screenshots/notch-card.png)
 
-> The screenshots are rendered from the widget's own QML with sample data (`tools/render-screenshots.sh`), so they match the real thing pixel for pixel.
+> The screenshots and the GIF are rendered from the widget's own QML with sample data (`tools/render-screenshots.sh`, `tools/render-demo-gif.sh`), so they match the real thing.
 
 ## Features
 
@@ -90,7 +92,7 @@ package/contents/ui/
   StatRow.qml     one row of the card
   Equalizer.qml   the animated music bars
 kwin-script/contents/code/main.js   cursor-zone detector
-tools/          offscreen screenshot renderer
+tools/          offscreen renderers for the screenshots and the demo GIF
 ```
 
 ## Customizing

@@ -7,6 +7,19 @@ ID="io.github.wnibraj.virtualnotch"
 KWIN_ID="virtualnotch"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Options:  --city "Name"   show weather for this city on the notch ("" = turn weather off)
+CITY=""; CITY_SET=0
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --city)   [ $# -ge 2 ] || { echo "--city needs a value" >&2; exit 1; }; CITY="$2"; CITY_SET=1; shift 2 ;;
+        --city=*) CITY="${1#--city=}"; CITY_SET=1; shift ;;
+        -h|--help) echo "Usage: ./install.sh [--city \"Your City\"]"; exit 0 ;;
+        *) echo "Unknown option: $1 (try --help)" >&2; exit 1 ;;
+    esac
+done
+# keep it safe inside the JS string below
+CITY="$(printf '%s' "$CITY" | tr -d "'\\\"\n")"
+
 say()  { printf '\033[1;35m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m !!\033[0m %s\n' "$*" >&2; }
 die()  { printf '\033[1;31m xx\033[0m %s\n' "$*" >&2; exit 1; }
@@ -89,6 +102,7 @@ if (locked) { print('LOCKED'); } else {
     var w = ws[j]; w.currentConfigGroup = ['General'];
     w.writeConfig('gpuSensor', '$GPU'); w.writeConfig('batterySensor', '$BAT');
     w.writeConfig('fanSensor', '$FAN'); w.writeConfig('ssdSensor', '$SSD');
+    if ($CITY_SET) w.writeConfig('weatherCity', '$CITY');
     w.reloadConfig();
   }
   print('OK ' + ws.length);
@@ -101,6 +115,8 @@ case "$OUT" in
 esac
 
 say "Done! The notch is at the top-center of your screen."
+if [ "$CITY_SET" = 1 ] && [ -n "$CITY" ]; then echo "    • Weather on the notch: $CITY"
+elif [ "$CITY_SET" = 0 ]; then echo "    • Tip: show weather on the notch with  ./install.sh --city \"Your City\""; fi
 echo "    • Mouse near it        → it slides away so whatever is under it (e.g. browser tabs) is visible"
 echo "    • Push mouse to the top edge above it and hold ~½ s → stats card"
 echo "    • Uninstall any time:  ./uninstall.sh"

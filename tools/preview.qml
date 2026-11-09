@@ -78,6 +78,9 @@ Window {
         readonly property bool hasBattery: true
         readonly property bool hasFan: true
         readonly property bool hasSsd: true
+        readonly property bool weatherOk: true
+        readonly property real weatherTemp: 28
+        readonly property string weatherIcon: "weather-few-clouds"
         readonly property real v_cpuTemp: 58
         readonly property real v_cpuUse: 23
         readonly property real v_gpuTemp: 47

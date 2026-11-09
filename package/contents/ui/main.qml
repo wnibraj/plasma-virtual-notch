@@ -3,7 +3,7 @@
  *
  * - Drawn in its own click-through layer-shell overlay: no panel, no border, never blocks the
  *   browser tabs or anything else underneath it.
- * - Collapsed: clock · camera lens · equalizer (music playing) or CPU temp.
+ * - Collapsed: clock · camera lens · equalizer (music playing) or weather (icon + temp; CPU temp if no city set).
  *   Mic in use → orange pulsing mic + app name + glow (event-driven, no polling).
  * - Mouse near it → slides away (browser tabs show). Mouse pushed to the top edge above it
  *   (dwell ~0.6 s) → morphs into a stats card. Hover detection comes from the small
@@ -162,6 +162,69 @@ PlasmoidItem {
     readonly property real v_fan: num(fan)
     readonly property real v_ssdTemp: num(ssdTemp)
     readonly property real v_uptime: num(uptime)
+    // ---------- weather (Open-Meteo: free, no API key) ----------
+    // City from config ("weatherCity"); empty -> notch shows CPU temperature instead.
+    readonly property string weatherCity: Plasmoid.configuration.weatherCity || ""
+    property real wLat: NaN
+    property real wLon: NaN
+    property real weatherTemp: NaN
+    property int weatherCode: -1
+    property bool weatherDay: true
+    readonly property bool weatherOk: weatherCity !== "" && !isNaN(weatherTemp)
+    readonly property string weatherIcon: weatherIconFor(weatherCode, weatherDay)
+    function weatherIconFor(c, day) {
+        if (c < 0) return "";
+        if (c === 0) return day ? "weather-clear" : "weather-clear-night";
+        if (c === 1 || c === 2) return day ? "weather-few-clouds" : "weather-few-clouds-night";
+        if (c === 3) return "weather-overcast";
+        if (c === 45 || c === 48) return "weather-fog";
+        if ((c >= 51 && c <= 57) || c === 61 || c === 80) return "weather-showers-scattered";
+        if ((c >= 62 && c <= 67) || c === 81 || c === 82) return "weather-showers";
+        if ((c >= 71 && c <= 77) || c === 85 || c === 86) return "weather-snow";
+        if (c >= 95) return "weather-storm";
+        return "weather-clouds";
+    }
+    property bool weatherBusy: false        // one request chain at a time
+    function getJson(url, ok) {
+        const x = new XMLHttpRequest();
+        x.onreadystatechange = function () {
+            if (x.readyState !== XMLHttpRequest.DONE) return;
+            weatherBusy = false;
+            let data = null;
+            if (x.status === 200) { try { data = JSON.parse(x.responseText); } catch (e) {} }
+            if (data) ok(data); else weatherRetry.restart();
+        };
+        x.timeout = 15000;
+        x.open("GET", url);
+        x.send();
+    }
+    function refreshWeather() {
+        if (weatherCity === "" || weatherBusy) return;
+        weatherBusy = true;
+        if (isNaN(wLat)) {
+            getJson("https://geocoding-api.open-meteo.com/v1/search?count=1&name=" + encodeURIComponent(weatherCity), function (d) {
+                if (!d.results || !d.results.length) { console.warn("virtual-notch: city not found:", weatherCity); return; }
+                wLat = d.results[0].latitude; wLon = d.results[0].longitude;
+                refreshWeather();
+            });
+            return;
+        }
+        getJson("https://api.open-meteo.com/v1/forecast?current=temperature_2m,weather_code,is_day&latitude=" + wLat + "&longitude=" + wLon, function (d) {
+            if (!d.current) { weatherRetry.restart(); return; }
+            weatherTemp = d.current.temperature_2m;
+            weatherCode = d.current.weather_code;
+            weatherDay = d.current.is_day === 1;
+            console.info("virtual-notch weather:", weatherCity, weatherTemp + "°C", "code", weatherCode, "->", weatherIcon);
+        });
+    }
+    onWeatherCityChanged: { wLat = NaN; wLon = NaN; weatherTemp = NaN; weatherCode = -1; Qt.callLater(refreshWeather); }
+    Timer {   // every 15 min (Open-Meteo updates current conditions every 15 min)
+        interval: 15 * 60 * 1000; repeat: true; triggeredOnStart: true
+        running: root.weatherCity !== ""
+        onTriggered: Qt.callLater(root.refreshWeather)   // callLater merges this with onWeatherCityChanged at startup
+    }
+    Timer { id: weatherRetry; interval: 60 * 1000; onTriggered: root.refreshWeather() }   // offline / after resume
+
     function tempColor(t) { return t >= 80 ? cHot : t >= 62 ? cWarn : cGood; }
     function loadColor(p) { return p >= 85 ? cHot : p >= 60 ? cWarn : cAccent; }
 

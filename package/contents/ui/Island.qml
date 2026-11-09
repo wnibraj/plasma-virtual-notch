@@ -113,7 +113,7 @@ Item {
                 }
             }
 
-            // right: mic app / equalizer / cpu temp
+            // right: mic app / equalizer / weather (or CPU temp)
             Item {
                 anchors { right: parent.right; rightMargin: 16; verticalCenter: parent.verticalCenter }
                 width: parent.width / 2 - 26; height: parent.height
@@ -132,10 +132,27 @@ Item {
                     opacity: n.playing && !n.micActive ? 1 : 0
                     Behavior on opacity { NumberAnimation { duration: 200 } }
                 }
+                // weather: icon + temperature for the configured city
                 Row {
                     anchors { right: parent.right; verticalCenter: parent.verticalCenter }
                     spacing: 5
-                    opacity: !n.playing && !n.micActive ? 1 : 0
+                    opacity: !n.playing && !n.micActive && n.weatherOk ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: 200 } }
+                    Kirigami.Icon {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 16; height: 16
+                        source: n.weatherIcon || ""
+                    }
+                    Text {
+                        text: n.weatherOk ? Math.round(n.weatherTemp) + "°" : ""
+                        color: n.cText; font.family: n.monoFont; font.pixelSize: 12; font.weight: Font.Medium
+                    }
+                }
+                // fallback when no city is set (or weather is unreachable): CPU temperature
+                Row {
+                    anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+                    spacing: 5
+                    opacity: !n.playing && !n.micActive && !n.weatherOk ? 1 : 0
                     Behavior on opacity { NumberAnimation { duration: 200 } }
                     Rectangle { anchors.verticalCenter: parent.verticalCenter; width: 6; height: 6; radius: 3; color: n.tempColor(n.v_cpuTemp) }
                     Text {

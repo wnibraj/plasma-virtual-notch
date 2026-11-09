@@ -21,5 +21,8 @@
     <entry name="ssdSensor" type="String">
       <default></default>
     </entry>
+    <entry name="weatherCity" type="String">
+      <default></default>
+    </entry>
   </group>
 </kcfg>

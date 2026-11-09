@@ -1,6 +1,6 @@
 # Virtual Notch for KDE Plasma 6
 
-A MacBook-style notch that sits at the top center of your screen on **KDE Plasma 6 (Wayland)**. It shows when your microphone is in use and what music is playing, and it opens a small card with temperatures and system stats.
+A MacBook-style notch that sits at the top center of your screen on **KDE Plasma 6 (Wayland)**. It shows the weather in your city, when your microphone is in use and what music is playing, and it opens a small card with temperatures and system stats.
 
 <p align="center"><img src="docs/demo.gif" alt="Virtual Notch demo: it slides away for the browser tab underneath, opens a stats card from the top edge, and turns orange when the mic is in use" width="720"></p>
 
@@ -8,7 +8,7 @@ It never gets in your way. Clicks go straight through it, and it **slides out of
 
 | | |
 |---|---|
-| **Idle:** clock + CPU temperature | ![idle](docs/screenshots/notch-idle.png) |
+| **Idle:** clock + weather icon and temperature for your city | ![idle](docs/screenshots/notch-idle.png) |
 | **Music playing:** live equalizer, pink rim | ![music](docs/screenshots/notch-music.png) |
 | **Mic in use:** pulsing orange mic + app name | ![mic](docs/screenshots/notch-mic.png) |
 
@@ -20,6 +20,7 @@ It never gets in your way. Clicks go straight through it, and it **slides out of
 
 ## Features
 
+- **Weather.** An icon (sunny, cloudy, rain, storm, fog, snow, with night variants) and the current temperature for your city, from [Open-Meteo](https://open-meteo.com). It's free and needs no API key or account, and it refreshes every 15 minutes. Without a city set, the notch shows your CPU temperature instead.
 - **Mic indicator.** The notch turns orange and shows which app is using your microphone (Discord, OBS, browsers, …). It reacts to PipeWire/PulseAudio events instead of polling.
 - **Now playing.** An equalizer appears while music plays. The card also shows the track, artist and album art from any MPRIS player (Spotify, browsers, VLC, …).
 - **Stats card.** CPU temperature and load, GPU temperature and load, RAM, SSD temperature, battery, fan speed and uptime. Sensors are detected automatically, and rows for sensors your machine lacks are hidden.
@@ -59,11 +60,19 @@ The installer:
 
 It's safe to run again. To **update**, run `git pull && ./install.sh`.
 
+To **show the weather** for your city, pass `--city`. Any city name works; it's looked up automatically.
+
+```bash
+./install.sh --city "Chattogram"
+```
+
+You can change the city by running the same command with a different name. `--city ""` turns weather off, and the notch goes back to showing CPU temperature. Re-running without `--city` keeps your current setting.
+
 ## How to use it
 
 | You do | The notch does |
 |---|---|
-| Nothing | Sits at the top center showing the clock and CPU temperature (or the equalizer while music plays) |
+| Nothing | Sits at the top center showing the clock and the weather (or the equalizer while music plays) |
 | Move the mouse close to it | Slides up out of the way, so you can see and click what's underneath |
 | Push the mouse against the very top edge above it and hold for about ½ s | Expands into the stats card |
 | Move the mouse off the card | Collapses back |
@@ -105,10 +114,15 @@ tools/          offscreen renderers for the screenshots and the demo GIF
 - **Colors and size.** These are the `c*` properties and `notchW`, `notchH` and `cardW` near the top of `package/contents/ui/main.qml`. If you change the size, update `NOTCH_W`, `NOTCH_H`, `CARD_W` and `CARD_H` in `kwin-script/contents/code/main.js` to match. Run `./install.sh` afterwards.
 - **Apps ignored by the mic indicator.** Edit `ignoreRe` in `main.qml`. It already ignores EasyEffects, cava, pavucontrol and similar tools.
 
+## Privacy
+
+The notch makes no network requests unless you set a city. When you do, it sends the city name to Open-Meteo's geocoding service once to get its coordinates. After that it requests the weather for those coordinates every 15 minutes. Nothing else leaves your machine.
+
 ## Troubleshooting
 
 - **The notch doesn't appear.** Make sure you're on a Wayland session (`echo $XDG_SESSION_TYPE`). Then restart Plasma with `systemctl --user restart plasma-plasmashell` and check for errors with `journalctl --user -b | grep -i virtualnotch`.
 - **The notch doesn't move away or the card won't open.** Check that the KWin helper is enabled under *System Settings → Window Management → KWin Scripts → Virtual Notch hover*.
+- **No weather showing.** Check `journalctl --user -b | grep virtual-notch`. A "city not found" message means the name wasn't recognized, so try the English spelling or add the country (`--city "Paris, France"`). The notch retries every minute while you're offline.
 - **"Your widgets are locked".** Right-click the desktop, choose *Unlock Widgets*, and re-run the installer.
 
 **Known limitation:** the notch is designed for a single screen and appears on the primary display.

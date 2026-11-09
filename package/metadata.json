@@ -1,0 +1,15 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [ { "Name": "wnibraj" } ],
+        "Category": "System Information",
+        "Description": "A virtual MacBook-style notch for Plasma 6 (Wayland): mic-in-use indicator, now playing, and a hover card with temperatures and system stats.",
+        "Icon": "audio-input-microphone",
+        "Id": "io.github.wnibraj.virtualnotch",
+        "License": "GPL-2.0+",
+        "Name": "Virtual Notch",
+        "Version": "1.0.0",
+        "Website": "https://github.com/wnibraj/plasma-virtual-notch"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

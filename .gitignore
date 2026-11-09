@@ -1,0 +1,9 @@
+# editor / OS junk
+*~
+*.swp
+.DS_Store
+.idea/
+.vscode/
+# local build or render scratch
+build/
+*.log

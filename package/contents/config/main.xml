@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0 http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+  <kcfgfile name=""/>
+  <group name="General">
+    <!-- Written by the "virtualnotch" KWin script: 0 = cursor away, 1 = on the notch, 2 = over the card area -->
+    <entry name="hover" type="Int">
+      <default>0</default>
+    </entry>
+    <!-- System-monitor sensor IDs. install.sh detects them for your machine; empty = row hidden.
+         List yours with:  busctl --user call org.kde.ksystemstats1 /org/kde/ksystemstats1 org.kde.ksystemstats1 allSensors -->
+    <entry name="gpuSensor" type="String"><default>gpu/gpu0</default></entry>
+    <entry name="batterySensor" type="String"><default></default></entry>
+    <entry name="fanSensor" type="String"><default></default></entry>
+    <entry name="ssdSensor" type="String"><default></default></entry>
+  </group>
+</kcfg>

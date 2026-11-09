@@ -1,0 +1,14 @@
+{
+    "KPackageStructure": "KWin/Script",
+    "KPlugin": {
+        "Authors": [ { "Name": "wnibraj" } ],
+        "Description": "Hover helper for the Virtual Notch widget: tells it where the cursor is (the notch itself is click-through).",
+        "EnabledByDefault": false,
+        "Id": "virtualnotch",
+        "License": "GPL-2.0+",
+        "Name": "Virtual Notch hover",
+        "Version": "1.0.0",
+        "Website": "https://github.com/wnibraj/plasma-virtual-notch"
+    },
+    "X-Plasma-API": "javascript"
+}
